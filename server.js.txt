@@ -1,0 +1,47 @@
+const express = require("express");
+const app = express();
+app.use(express.json());
+
+const PORT = process.env.PORT || 3000;
+
+// In-memory cache for users
+const cache = {};
+
+// Predefined IDs
+const PLAYFAB_ID = "149A58";
+const PHOTON_IDS = [
+  "fb31c2b8-1b52-45f2-ab94-a74c32b2dfe1",
+  "7a999744-bf30-4219-9d32-6bd268de54a4"
+];
+
+// Endpoint to mimic CachePlayFabId
+app.post("/api/cachePlayFabId", (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({
+      code: 400,
+      status: "InvalidRequest",
+      error: "Missing userId",
+    });
+  }
+
+  // If user is not cached, store the IDs
+  if (!cache[userId]) {
+    cache[userId] = {
+      PlayFabId: PLAYFAB_ID,
+      PhotonIds: PHOTON_IDS,
+      CreatedAt: new Date().toISOString(),
+      Cached: true,
+    };
+  }
+
+  res.json({
+    code: 200,
+    status: "OK",
+    data: cache[userId],
+  });
+});
+
+// Start the server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
